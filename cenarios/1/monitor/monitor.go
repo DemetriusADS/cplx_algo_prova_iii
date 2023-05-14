@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/DemetriusADS/cplx_algo_prova_ii/cenarios/2/machine"
+	"github.com/DemetriusADS/cplx_algo_prova_ii/cenarios/1/machine"
 )
 
 type Monitor struct {

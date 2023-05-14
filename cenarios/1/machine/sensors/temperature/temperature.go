@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/DemetriusADS/cplx_algo_prova_ii/cenarios/2/machine/ports/sensor"
+	"github.com/DemetriusADS/cplx_algo_prova_ii/cenarios/1/machine/ports/sensor"
 )
 
 type Temparature struct {
