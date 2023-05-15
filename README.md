@@ -22,7 +22,7 @@ go mod download
 
 ## Executando o projeto
 
-É possível executar o programa de 3 formas diferentes. Mas atente-se à flag que será utilizada. São duas possíveis:
+É possível executar o programa de 3 formas diferentes. **Mas atente-se à flag que será utilizada**. São duas possíveis:
 
 - `cenario-1`
 - `cenario-2`<br>
