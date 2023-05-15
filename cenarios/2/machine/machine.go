@@ -35,7 +35,7 @@ func NewMachine(name string, volumeSensor, temperatureSensor sensor.Sensor) *Mac
 	}
 
 	go func() {
-		time.Sleep(50 * time.Second)
+		time.Sleep(5 * time.Second)
 		machine.isOn = false
 		if machine.mQuit != nil {
 			machine.mQuit <- true
