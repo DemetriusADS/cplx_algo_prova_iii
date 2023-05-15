@@ -12,7 +12,7 @@ import (
 
 const qtyMachines = 10
 
-var StartCenario1 = &cobra.Command{
+var Start = &cobra.Command{
 	Use:                   "cenario-1",
 	Short:                 "Executa o cenario 1",
 	DisableFlagsInUseLine: true,

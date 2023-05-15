@@ -37,12 +37,12 @@ func (m *Monitor) Start() {
 					continue
 				}
 				fmt.Printf("A MAQUINA: %s, POSSUI METRICAS INSTÁVEIS. CALIBRANDO...\n", machine.Name)
-				newTemp := metric.Volume.Value * 2.5
-				if newTemp < 100 {
-					newTemp = 100
+				if metric.Volume.Value > 0 {
+					metric.Temperature.Value = metric.Volume.Value * 2.5
+				} else {
+					metric.Temperature.Value = 0
 				}
 				fmt.Printf("TEMPERATURA ATUAL: %f\n", metric.Temperature.Value)
-				metric.Temperature.Value = newTemp
 				metric.Temperature.Time = now
 				metric.Volume.Time = now
 				fmt.Printf("TEMPERATURA AJUSTADA: %f\n", metric.Temperature.Value)
