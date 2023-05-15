@@ -50,9 +50,11 @@ func (m *Machine) RegisterChannel(c chan string, q chan bool) {
 	m.mQuit = q
 }
 
+// Complexidade O(n)
+// Justificativa: A função GenData é executada em O(n), pois há um loop que executa n vezes, sendo n a quantidade de métricas.
 func (m *Machine) GenData() {
 	for i := 0; i < qtyMetrics; i++ {
-		time.Sleep(1 * time.Second)
+		// time.Sleep(1 * time.Second)
 		temp := m.TemperatureSensor.Read()
 		vol := m.VolumeSensor.Read()
 		metricGen := &Metric{
@@ -73,17 +75,20 @@ func (m *Machine) Read() []*Metric {
 	return m.Metrics
 }
 
+// Complexidade O(1)
+// Justificativa: A função FixTemperature é executada em uma goroutine, portanto, não é considerada na complexidade.
+// Mas, analisando o código em si, a função FixTemperature é executada em O(1), pois não há nenhum loop ou estrutura de repetição.
 func (m *Machine) FixTemperature(metric *Metric) {
 	now := time.Now().Format("2006-01-02 15:04:05")
 	if !metric.Unstable {
 		return
 	}
+	fmt.Printf("TEMPERATURA ATUAL DA %s: %f\n", m.Name, metric.Temperature.Value)
 	if metric.Volume.Value > 0 {
 		metric.Temperature.Value = metric.Volume.Value * 2.5
 	} else {
 		metric.Temperature.Value = 0
 	}
-	fmt.Printf("TEMPERATURA ATUAL DA %s: %f\n", m.Name, metric.Temperature.Value)
 	metric.Temperature.Time = now
 	metric.Volume.Time = now
 	fmt.Printf("TEMPERATURA AJUSTADA DA %s:: %f\n", m.Name, metric.Temperature.Value)
@@ -93,7 +98,3 @@ func (m *Machine) FixTemperature(metric *Metric) {
 func (m *Machine) IsOn() bool {
 	return m.isOn
 }
-
-// Aqui escolhi utilizar o algoritmo de ordenação Bubble Sort, pois ele é simples e fácil de implementar.
-// O Bubble Sort é um algoritmo de ordenação simples que percorre o array várias vezes, comparando elementos adjacentes e os trocando de posição se estiverem na ordem errada.
-// Sua complexidade é O(n²) por conter dois "for" aninhados.

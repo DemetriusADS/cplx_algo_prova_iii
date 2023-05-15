@@ -6,7 +6,7 @@ import (
 	"github.com/DemetriusADS/cplx_algo_prova_ii/cenarios/1/machine/ports/sensor"
 )
 
-const qtyMetrics = 40
+const qtyMetrics = 2000
 
 type Metric struct {
 	Temperature sensor.SensorDTO
@@ -32,16 +32,18 @@ func NewMachine(name string, volumeSensor, temperatureSensor sensor.Sensor) *Mac
 	}
 
 	go func() {
-		time.Sleep(50 * time.Second)
+		time.Sleep(5 * time.Second)
 		machine.isOn = false
 	}()
 
 	return &machine
 }
 
+// Complexidade O(n)
+// O codigo em questão possui uma complexidade O(n) pois o for é executado n vezes, sendo n a quantidade de métricas.
 func (m *Machine) GenData() {
 	for i := 0; i < qtyMetrics; i++ {
-		time.Sleep(1 * time.Second)
+		// time.Sleep(1 * time.Second)
 		temp := m.TemperatureSensor.Read()
 		vol := m.VolumeSensor.Read()
 
@@ -60,7 +62,3 @@ func (m *Machine) Read() []*Metric {
 func (m *Machine) IsOn() bool {
 	return m.isOn
 }
-
-// Aqui escolhi utilizar o algoritmo de ordenação Bubble Sort, pois ele é simples e fácil de implementar.
-// O Bubble Sort é um algoritmo de ordenação simples que percorre o array várias vezes, comparando elementos adjacentes e os trocando de posição se estiverem na ordem errada.
-// Sua complexidade é O(n²) por conter dois "for" aninhados.

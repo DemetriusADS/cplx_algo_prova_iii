@@ -18,6 +18,9 @@ func NewMonitor(machines []*machine.Machine) *Monitor {
 	}
 }
 
+// Complexidade O(n^4)
+// O código em questão possui tal complexidade pois o método Start() possui um loop for para executar o polling a todo instante. (Como em Go nao existe a estrutura while ou do while, é utilizando esse for, sem condicoes). Na sequencia, é executado outro loop for para verificar se a máquina está ligada. Caso esteja, é executado outro loop for para verificar se a máquina está com as métricas instáveis. Caso esteja, é executado outro loop for para ajustar a temperatura da máquina.
+// Caso a maquina esteja desligada, é executado outro loop for para verificar se todas as máquinas estão desligadas. Caso estejam, o monitoramento é finalizado.
 func (m *Monitor) Start() {
 	fmt.Printf("Iniciando monitoramento\n")
 	machinesOff := []string{}
@@ -37,12 +40,12 @@ func (m *Monitor) Start() {
 					continue
 				}
 				fmt.Printf("A MAQUINA: %s, POSSUI METRICAS INSTÁVEIS. CALIBRANDO...\n", machine.Name)
+				fmt.Printf("TEMPERATURA ATUAL: %f\n", metric.Temperature.Value)
 				if metric.Volume.Value > 0 {
 					metric.Temperature.Value = metric.Volume.Value * 2.5
 				} else {
 					metric.Temperature.Value = 0
 				}
-				fmt.Printf("TEMPERATURA ATUAL: %f\n", metric.Temperature.Value)
 				metric.Temperature.Time = now
 				metric.Volume.Time = now
 				fmt.Printf("TEMPERATURA AJUSTADA: %f\n", metric.Temperature.Value)
@@ -52,6 +55,9 @@ func (m *Monitor) Start() {
 	}
 }
 
+// Complexidade O(n)
+// O código em questão possui tal complexidade pois o método checkMachineStatus() verifica se a máquina está ligada. Caso esteja, é executado um loop for para verificar se essa máquina já está registrada como desligada. Caso esteja, o loop é finalizado. Caso não esteja, a máquina é registrada e o loop encerrado.
+// Mas, primeiramente, para evitar processamento desnecessário e otimizar o código, é verificado se todas as máquinas estão desligadas. Caso estejam, o monitoramento é finalizado.
 func (m *Monitor) checkMachineStatus(machine *machine.Machine, machinesOff *[]string) (bool, error) {
 	if !machine.IsOn() {
 		if len(*machinesOff) == len(m.machines) {

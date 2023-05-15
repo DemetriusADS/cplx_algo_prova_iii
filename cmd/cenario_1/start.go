@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const qtyMachines = 10
+const qtyMachines = 100
 
 var Start = &cobra.Command{
 	Use:                   "cenario-1",
@@ -32,6 +32,5 @@ var Start = &cobra.Command{
 			go machines[i].GenData()
 		}
 		monitor.NewMonitor(machines).Start()
-
 	},
 }
