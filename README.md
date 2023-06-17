@@ -1,6 +1,6 @@
 # cplx_algo_prova_ii
 
-# Prova II Unidade - Complexidade de Algoritmos
+# Prova III Unidade - Complexidade de Algoritmos
 
 > Aluno: Demetrius Araujo <br>
 > Tema: Monitoramento de Calderia <br>
@@ -10,6 +10,8 @@
 
 - Ter a versão 1.20+ ou superior instalado na máquina
   - https://go.dev/doc/install
+- Ter instalado a versão OpenCV 4.7.0
+  - Para mais informacoes a respeito, ver: https://gocv.io/getting-started/linux/
 
 ## Instalando os pacotes
 
@@ -22,9 +24,8 @@ go mod download
 
 ## Executando o projeto
 
-É possível executar o programa de 3 formas diferentes. **Mas atente-se à flag que será utilizada**. São duas possíveis:
+É possível executar o programa de 3 formas diferentes. **Mas atente-se à flag que será utilizada**:
 
-- `cenario-1`
 - `cenario-2`<br>
 
 #### Comando para executar o projeto:

@@ -19,7 +19,7 @@ var Start = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("Executando o cenario 2\n")
 		var machines []*machine.Machine
-		machineChannel := make(chan string)
+		machineChannel := make(chan machine.MetricDTO)
 		machineQuitChannel := make(chan bool)
 		for i := 0; i < qtyMachines; i++ {
 			machine := machine.NewMachine(

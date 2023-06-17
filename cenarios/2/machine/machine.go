@@ -1,25 +1,38 @@
 package machine
 
 import (
+	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/json"
 	"fmt"
+	"io"
 	"time"
 
-	"github.com/DemetriusADS/cplx_algo_prova_ii/cenarios/1/machine/ports/sensor"
+	"github.com/DemetriusADS/cplx_algo_prova_ii/cenarios/2/machine/ports/sensor"
+	keygen "github.com/DemetriusADS/cplx_algo_prova_ii/utils/keyGen"
 )
 
 const qtyMetrics = 40
 
 type Metric struct {
-	Temperature sensor.SensorDTO
-	Volume      sensor.SensorDTO
-	Unstable    bool
+	Temperature sensor.SensorDTO `json:"temperature"`
+	Volume      sensor.SensorDTO `json:"volume"`
+	Unstable    bool             `json:"unstable"`
+}
+
+type MetricDTO struct {
+	MachineName string `json:"machineName"`
+	Metrics     []byte `json:"metrics"`
+	Key         []byte `json:"key"`
 }
 
 type Machine struct {
 	Metrics  []*Metric
 	Name     string
 	isOn     bool
-	mChannel chan string
+	mChannel chan MetricDTO
 	mQuit    chan bool
 
 	VolumeSensor      sensor.Sensor
@@ -45,7 +58,7 @@ func NewMachine(name string, volumeSensor, temperatureSensor sensor.Sensor) *Mac
 	return &machine
 }
 
-func (m *Machine) RegisterChannel(c chan string, q chan bool) {
+func (m *Machine) RegisterChannel(c chan MetricDTO, q chan bool) {
 	m.mChannel = c
 	m.mQuit = q
 }
@@ -67,7 +80,17 @@ func (m *Machine) GenData() {
 			time.Sleep(1 * time.Second)
 			m.FixTemperature(metric)
 		}(metricGen)
-		m.mChannel <- fmt.Sprintf("%s\n Temperatura: %f\n Volume: %f\n Leitura Calibrada: %t\n", m.Name, metricGen.Temperature.Value, metricGen.Volume.Value, !metricGen.Unstable)
+		//inserir a encryptacao aqui
+		// kg := keygen.New()
+		// key := kg.Generate()
+		// fmt.Printf("Chave gerada: %s\n", key)
+		encoded, _ := json.Marshal(*metricGen)
+		toSend, err := m.Encrypt(encoded)
+		if err != nil {
+			fmt.Printf("Erro ao encriptar: %s\n", err)
+			return
+		}
+		m.mChannel <- *toSend
 	}
 }
 
@@ -97,4 +120,38 @@ func (m *Machine) FixTemperature(metric *Metric) {
 
 func (m *Machine) IsOn() bool {
 	return m.isOn
+}
+
+func (m *Machine) Encrypt(data []byte) (*MetricDTO, error) {
+	//inserir a encryptacao aqui
+	kg := keygen.New()
+	key := kg.Generate()
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+
+	// Generate a random IV (initialization vector)
+	iv := make([]byte, aes.BlockSize)
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return nil, err
+	}
+
+	mode := cipher.NewCBCEncrypter(block, iv)
+	padding := aes.BlockSize - (len(data) % aes.BlockSize)
+	paddedData := append(data, bytes.Repeat([]byte{byte(padding)}, padding)...)
+
+	// Encrypt the data
+	encryptedData := make([]byte, len(paddedData))
+	mode.CryptBlocks(encryptedData, paddedData)
+
+	// Combine IV and encrypted data
+	encryptedDataWithIV := append(iv, encryptedData...)
+	mDto := MetricDTO{
+		MachineName: m.Name,
+		Metrics:     encryptedDataWithIV,
+		Key:         key,
+	}
+
+	return &mDto, nil
 }

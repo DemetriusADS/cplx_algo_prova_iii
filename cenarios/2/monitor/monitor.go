@@ -1,6 +1,9 @@
 package monitor
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"encoding/json"
 	"fmt"
 
 	"github.com/DemetriusADS/cplx_algo_prova_ii/cenarios/2/machine"
@@ -8,11 +11,11 @@ import (
 
 type Monitor struct {
 	machines  []*machine.Machine
-	mChannel  chan string
+	mChannel  chan machine.MetricDTO
 	mqChannel chan bool
 }
 
-func NewMonitor(machines []*machine.Machine, mChannel chan string, mqChannel chan bool) *Monitor {
+func NewMonitor(machines []*machine.Machine, mChannel chan machine.MetricDTO, mqChannel chan bool) *Monitor {
 	return &Monitor{
 		machines:  machines,
 		mChannel:  mChannel,
@@ -30,7 +33,20 @@ func (m *Monitor) Start() {
 	for {
 		select {
 		case msg := <-m.mChannel:
-			fmt.Print(msg)
+			fmt.Printf("Recebendo dados da %s\n. Dados cryptografados: %v\n\n", msg.MachineName, msg.Metrics)
+			decryptedData, err := m.Decrypt(msg)
+			if err != nil {
+				fmt.Printf("Erro ao descriptografar dados: %s\n", err.Error())
+				continue
+			}
+			var metric machine.Metric
+			err = json.Unmarshal(decryptedData, &metric)
+			if err != nil {
+				fmt.Printf("Erro ao converter dados: %s\n", err.Error())
+				continue
+			}
+			fmt.Printf("Temperatura: %f\n Volume: %f\n Leitura Estável: %t\n", metric.Temperature.Value, metric.Volume.Value, !metric.Unstable)
+
 		case <-m.mqChannel:
 			machinesOff++
 			if machinesOff == len(m.machines) {
@@ -47,4 +63,29 @@ func (m *Monitor) Start() {
 			}
 		}
 	}
+}
+
+func (m *Monitor) Decrypt(data machine.MetricDTO) ([]byte, error) {
+	fmt.Printf("Descriptografando dados\n")
+	block, err := aes.NewCipher(data.Key)
+	if err != nil {
+		return nil, err
+	}
+
+	// Extract IV from the encrypted data
+	iv := data.Metrics[:aes.BlockSize]
+	encryptedData := data.Metrics[aes.BlockSize:]
+
+	// Create a new AES cipher block mode
+	mode := cipher.NewCBCDecrypter(block, iv)
+
+	// Decrypt the data
+	decryptedData := make([]byte, len(encryptedData))
+	mode.CryptBlocks(decryptedData, encryptedData)
+
+	// Remove padding from the decrypted data
+	padding := decryptedData[len(decryptedData)-1]
+	decryptedData = decryptedData[:len(decryptedData)-int(padding)]
+
+	return decryptedData, nil
 }
